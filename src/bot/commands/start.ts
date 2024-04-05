@@ -3,7 +3,7 @@ import { StoredGroup } from "@/types";
 import { cleanUpBotMessage, onlyAdmin } from "@/utils/bot";
 import { BOT_USERNAME } from "@/utils/env";
 import { isValidEthAddress } from "@/utils/web3";
-import { syncProjectGroups } from "@/vars/projectGroups";
+import { syncProjectGroups, projectGroups } from "@/vars/projectGroups";
 import { CommandContext, Context } from "grammy";
 
 export async function startBot(ctx: CommandContext<Context>) {
