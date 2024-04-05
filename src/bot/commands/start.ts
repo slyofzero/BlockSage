@@ -1,8 +1,9 @@
-import { addDocument, getDocument, updateDocumentById } from "@/firebase";
+import { addDocument, updateDocumentById } from "@/firebase";
 import { StoredGroup } from "@/types";
 import { cleanUpBotMessage, onlyAdmin } from "@/utils/bot";
 import { BOT_USERNAME } from "@/utils/env";
 import { isValidEthAddress } from "@/utils/web3";
+import { syncProjectGroups } from "@/vars/projectGroups";
 import { CommandContext, Context } from "grammy";
 
 export async function startBot(ctx: CommandContext<Context>) {
@@ -36,10 +37,9 @@ Pass a token address in the bot chat to get an AI generated token report in real
 To configure bot;
 type /settings`;
 
-    const [projectData] = await getDocument<StoredGroup>({
-      collectionName: "project_groups",
-      queries: [["chatId", "==", String(chatId)]],
-    });
+    const projectData = projectGroups.find(
+      ({ chatId: storedChatId }) => storedChatId === chatId
+    );
 
     if (projectData) {
       ctx.reply(cleanUpBotMessage(text), { parse_mode: "MarkdownV2" });
@@ -48,7 +48,7 @@ type /settings`;
         updates,
         collectionName: "project_groups",
         id: projectData.id || "",
-      });
+      }).then(() => syncProjectGroups());
 
       return;
     }
@@ -57,7 +57,7 @@ type /settings`;
     addDocument<StoredGroup>({
       data: { chatId, token },
       collectionName: "project_groups",
-    });
+    }).then(() => syncProjectGroups());
     return;
   }
 

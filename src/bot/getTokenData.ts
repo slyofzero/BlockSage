@@ -17,7 +17,8 @@ export async function getTokenData(ctx: CommandContext<Context>) {
 
   const token = ctx.message?.text || ctx.channelPost?.text || "";
   const tokenData = (await apiFetcher<TokenData>(`${TOKEN_API}/${token}`)).data;
-  const firstPair = tokenData?.pairs.at(0);
+  const tokenPairs = tokenData?.pairs;
+  const firstPair = tokenPairs?.at(0);
 
   if (!firstPair) {
     return ctx.reply("No pairs found for this token");
@@ -26,13 +27,16 @@ export async function getTokenData(ctx: CommandContext<Context>) {
   const generationMessage = await ctx.reply(
     "Generating report for this token..."
   );
+  const typingInterval = setInterval(() => {
+    ctx.api.sendChatAction(ctx.chat.id, "typing");
+  }, 4000);
   const tokenAudit = await auditToken(firstPair.pairAddress);
 
   const prompt = `Token audit - ${JSON.stringify(
     tokenAudit
   )} and token market data - ${JSON.stringify(
-    firstPair
-  )}. These two are an Ethereum token's token audit and current market data. Use both the audit data and market data to create a report. First list out the positive things about the token, then list out the negatives, then give a brief overview of it all. Don't use ** to highlight things, instead use lots of relevant emojis. Also include a score out of 100 between the negatives list and the overview.`;
+    tokenPairs
+  )}. These two are an Ethereum token's token audit and current market data. Use both the audit data and market data to create a report. Make a list of 3 positive and 3 negative things about the token, then give a short overview of it all in one paragraph. Don't use ** to highlight things, use relevant emojis. Also include a score out of 100 like 'Token score - 100/100' between the negatives list and the overview. Token being locked in dead address is a good thing. Don't use any special characters to highlight certain things. Just keep them simple.`;
 
   const chatCompletion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
@@ -44,4 +48,6 @@ export async function getTokenData(ctx: CommandContext<Context>) {
     ctx.reply(shillText);
     await ctx.deleteMessages([generationMessage.message_id]);
   }
+
+  clearInterval(typingInterval);
 }
