@@ -36,7 +36,7 @@ export async function getTokenData(ctx: CommandContext<Context>) {
     tokenAudit
   )} and token market data - ${JSON.stringify(
     tokenPairs
-  )}. These two are an Ethereum token's token audit and current market data. Use both the audit data and market data to create a report. Make a list of 3 positive and 3 negative things about the token, then give a short overview of it all in one paragraph. Don't use ** to highlight things, use relevant emojis. Also include a score out of 100 like 'Token score - 100/100' between the negatives list and the overview. Token being locked in dead address is a good thing. Don't use any special characters to highlight certain things. Just keep them simple.`;
+  )}. These two are an Ethereum token's token audit and current market data. Use both the audit data and market data to create a report. Make a list of 3 positive and 3 negative things about the token, then give a short overview of it all in one paragraph. Don't use ** to highlight things. Also include a score out of 100 like 'Token score - 100/100' between the negatives list and the overview. Token being locked in dead address is a good thing. Don't use any special characters to highlight certain things. Add lots of emojis and the report shouldn't look formal or boring. The whole report should be very informal and easy to ready with simple wording, and maybe a few jokes.`;
 
   const chatCompletion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
